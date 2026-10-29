@@ -15,6 +15,7 @@
 package systrap
 
 import (
+	"unsafe"
 	"fmt"
 	"os"
 	"runtime"
@@ -1118,6 +1119,24 @@ func (s *subprocess) createSysmsgThread() error {
 
 	if err := unix.Setpriority(unix.PRIO_PROCESS, int(p.tid), sysmsgThreadPriority); err != nil {
 		log.Warningf("Unable to change priority of a stub thread: %s", err)
+	}
+
+	// Unblock all signals for the sysmsg thread: it inherits a nearly
+	// fully blocked mask from the creation path, which prevents SIGSYS
+	// (trapped syscalls) and SIGCHLD (interrupts) from ever reaching the
+	// sighandler. The empty sigset lives in the syscall thread's message
+	// page scratch space, mapped in both the sentry and the stub.
+	if s.syscallThread != nil && s.syscallThread.sentryAddr != 0 {
+		*(*uint64)(unsafe.Pointer(s.syscallThread.sentryAddr + 4128)) = 0
+		if _, err := p.syscallIgnoreInterrupt(&p.initRegs, unix.SYS_RT_SIGPROCMASK,
+			arch.SyscallArgument{Value: 2}, // SIG_SETMASK
+			arch.SyscallArgument{Value: s.syscallThread.stubAddr + 4128},
+			arch.SyscallArgument{Value: 0},
+			arch.SyscallArgument{Value: 8}, // sigsetsize
+			arch.SyscallArgument{Value: 0},
+			arch.SyscallArgument{Value: 0}); err != nil {
+			panic(fmt.Sprintf("rt_sigprocmask: %v", err))
+		}
 	}
 
 	// Install a pre-compiled seccomp rules for the BPF process.
