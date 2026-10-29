@@ -83,7 +83,7 @@ func (systrapSeccomp) SyscallFilters(vars precompiledseccomp.Values) seccomp.Sys
 				seccomp.EqualTo(8),
 			},
 			seccomp.PerArg{
-				seccomp.EqualTo(unix.PTRACE_SYSEMU),
+				seccomp.EqualTo(ptraceSysemu),
 				seccomp.AnyValue{},
 				seccomp.EqualTo(0),
 				seccomp.EqualTo(0),

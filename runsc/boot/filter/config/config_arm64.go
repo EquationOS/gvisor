@@ -48,3 +48,8 @@ func archFstatAtSysNo() uintptr {
 func archSpecificHotSyscalls() []uintptr {
 	return nil
 }
+
+// archRenameAtSysNo returns the rename syscall used by this architecture.
+func archRenameAtSysNo() uintptr {
+	return unix.SYS_RENAMEAT
+}

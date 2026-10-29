@@ -475,7 +475,6 @@ func (t *thread) syscall(regs *arch.Registers) (uintptr, error) {
 	if err := t.getRegs(regs); err != nil {
 		panic(fmt.Sprintf("ptrace get regs failed: %v", err))
 	}
-
 	return syscallReturnValue(regs)
 }
 
@@ -552,14 +551,14 @@ func (s *subprocess) switchToApp(c *context, ac *arch.Context64) bool {
 		if isSingleStepping(regs) {
 			if _, _, errno := unix.RawSyscall6(
 				unix.SYS_PTRACE,
-				unix.PTRACE_SYSEMU_SINGLESTEP,
+				ptraceSysemuSinglestep,
 				uintptr(t.tid), 0, 0, 0, 0); errno != 0 {
 				panic(fmt.Sprintf("ptrace sysemu failed: %v", errno))
 			}
 		} else {
 			if _, _, errno := unix.RawSyscall6(
 				unix.SYS_PTRACE,
-				unix.PTRACE_SYSEMU,
+				ptraceSysemu,
 				uintptr(t.tid), 0, 0, 0, 0); errno != 0 {
 				panic(fmt.Sprintf("ptrace sysemu failed: %v", errno))
 			}

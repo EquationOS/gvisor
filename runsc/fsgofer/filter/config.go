@@ -234,7 +234,8 @@ var lisafsFilters = seccomp.MakeSyscallRules(map[uintptr]seccomp.SyscallRule{
 	unix.SYS_MKDIRAT:    seccomp.MatchAll{},
 	unix.SYS_MKNODAT:    seccomp.MatchAll{},
 	unix.SYS_READLINKAT: seccomp.MatchAll{},
-	unix.SYS_RENAMEAT:   seccomp.MatchAll{},
+	// riscv64 only supports SYS_RENAMEAT2
+	//unix.SYS_RENAMEAT:   seccomp.MatchAll{},
 	unix.SYS_SYMLINKAT:  seccomp.MatchAll{},
 	unix.SYS_FTRUNCATE:  seccomp.MatchAll{},
 	unix.SYS_UNLINKAT:   seccomp.MatchAll{},

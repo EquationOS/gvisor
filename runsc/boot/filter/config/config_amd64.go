@@ -54,3 +54,8 @@ func archSpecificHotSyscalls() []uintptr {
 		unix.SYS_EPOLL_WAIT, // Same
 	}
 }
+
+// archRenameAtSysNo returns the rename syscall used by this architecture.
+func archRenameAtSysNo() uintptr {
+	return unix.SYS_RENAMEAT
+}

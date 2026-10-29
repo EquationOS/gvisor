@@ -396,7 +396,7 @@ func hostFilesystemFilters() seccomp.SyscallRules {
 			seccomp.AnyValue{},
 			seccomp.AnyValue{},
 		},
-		unix.SYS_RENAMEAT: seccomp.PerArg{
+		archRenameAtSysNo(): seccomp.PerArg{
 			seccomp.NonNegativeFD{},
 			seccomp.AnyValue{},
 			seccomp.NonNegativeFD{},
