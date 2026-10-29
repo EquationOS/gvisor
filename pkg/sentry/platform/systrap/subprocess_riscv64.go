@@ -110,7 +110,13 @@ func (t *thread) adjustInitRegsRip() {
 
 // Pass the expected PPID to the child via S7 when creating stub process
 func initChildProcessPPID(initregs *arch.Registers, ppid int32) {
-	// S8 has to be set to 1 when creating stub process.
+	// S8 selects the NEW_STUB path in the stub bootstrap.
+	//
+	// S7 (the expected PPID) is intentionally NOT updated: the clone uses
+	// CLONE_PARENT, so the child ppid equals the source stub ppid (the
+	// sandbox), which is exactly what S7 already holds from the original
+	// bootstrap. Overwriting it with the source stub tgid makes the
+	// getppid check in the stub fail and the child exits via parent_dead.
 	initregs.Regs[24] = _NEW_STUB
 }
 

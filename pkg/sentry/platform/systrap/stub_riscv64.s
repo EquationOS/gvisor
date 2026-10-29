@@ -24,7 +24,7 @@
 #define SYS_PRCTL	 167 // +checkconst unix SYS_PRCTL
 #define PR_SET_PDEATHSIG 1   // +checkconst unix PR_SET_PDEATHSIG
 
-#define SYS_FUTEX	 422 // +checkconst unix SYS_FUTEX
+#define SYS_FUTEX	 98 // riscv64/asm-generic __NR_futex // +checkconst unix SYS_FUTEX
 #define FUTEX_WAKE	 1  // +checkconst linux FUTEX_WAKE
 #define FUTEX_WAIT	 0  // +checkconst linux FUTEX_WAIT
 
@@ -104,8 +104,9 @@ clone:
 	// thus executing this code. We setup the PDEATHSIG before SIGSTOPing
 	// ourselves for attach by the tracer.
 	//
-	// S7 has been updated with the expected PPID.
-	BEQ ZERO, S7, begin
+	// The clone syscall returns 0 in the child: run the full bootstrap
+	// dance there. The parent (non-zero return) parks at done.
+	BEQ ZERO, A0, begin
 
 	// The clone system call returned a non-zero value.
 	JMP done

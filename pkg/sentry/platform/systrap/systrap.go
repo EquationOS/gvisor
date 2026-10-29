@@ -376,7 +376,7 @@ func (*Systrap) MaxUserAddress() hostarch.Addr {
 
 // NewAddressSpace returns a new subprocess.
 func (p *Systrap) NewAddressSpace(any) (platform.AddressSpace, <-chan struct{}, error) {
-	as, err := newSubprocess(globalPool.source.createStub, p.memoryFile, true)
+	as, err := newSubprocess(globalPool.source.createStub, p.memoryFile, false) // TODO(riscv64): port the seccomp-unotify syscall thread
 	return as, nil, err
 }
 
