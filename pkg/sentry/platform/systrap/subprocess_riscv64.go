@@ -106,6 +106,13 @@ func dumpRegs(regs *arch.Registers) string {
 // be just before the system call instruction execution.
 func (t *thread) adjustInitRegsRip() {
 	t.initRegs.Regs[0] -= initRegsRipAdjustment
+	// Park injection fallthroughs in syscall_loop: after an injected ecall
+	// returns, control falls into the stub dispatch; with a stale S8 (e.g.
+	// NEW_STUB left by a previous clone request) and a successful zero
+	// return value the thread would wrongly re-run the bootstrap dance and
+	// die on an untraced EBREAK. Stub clones override S8 via
+	// initChildProcessPPID, so RUN_SYSCALL_LOOP is a safe default.
+	t.initRegs.Regs[24] = _RUN_SYSCALL_LOOP
 }
 
 // Pass the expected PPID to the child via S7 when creating stub process
