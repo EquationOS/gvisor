@@ -69,11 +69,23 @@ func (p *sysmsgThread) init(sentryAddr, guestAddr uintptr) {
 //go:nosplit
 //go:norace
 func sysmsgSigactions(stubSysmsgStart uintptr) unix.Errno {
-	act := linux.SigAction{
+	// The riscv64 kernel expects struct __kernel_sigaction
+	// {sa_handler; sa_mask; sa_flags(int+pad); sa_restorer}, which differs
+	// from the x86_64-ordered linux.SigAction. Build it explicitly or the
+	// kernel reads sa_restorer from the wrong slot and the handler returns
+	// to a garbage address.
+	type riscv64SigAction struct {
+		Handler  uint64
+		Mask     uint64
+		Flags    uint32
+		_        uint32
+		Restorer uint64
+	}
+	act := riscv64SigAction{
 		Handler:  uint64(stubSysmsgStart) + uint64(sysmsg.Sighandler_blob_offset____export_sighandler),
+		Mask:     1<<(linux.SIGCHLD-1) | 1<<(linux.SIGSYS-1),
 		Flags:    linux.SA_ONSTACK | linux.SA_RESTORER | linux.SA_SIGINFO,
 		Restorer: uint64(stubSysmsgStart) + uint64(sysmsg.Sighandler_blob_offset____export_restore_rt),
-		Mask:     1<<(linux.SIGCHLD-1) | 1<<(linux.SIGSYS-1),
 	}
 
 	for _, s := range []unix.Signal{
