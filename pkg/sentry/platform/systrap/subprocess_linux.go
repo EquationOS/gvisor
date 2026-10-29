@@ -87,6 +87,9 @@ func attachedThread(flags uintptr, defaultAction linux.BPFAction) (*thread, erro
 				},
 				unix.SYS_GETPPID: seccomp.MatchAll{},
 
+				// For injected signal-mask setup on sysmsg threads.
+				unix.SYS_RT_SIGPROCMASK: seccomp.MatchAll{},
+
 				// For the stub to stop itself (all).
 				unix.SYS_GETPID: seccomp.MatchAll{},
 				unix.SYS_KILL: seccomp.PerArg{
